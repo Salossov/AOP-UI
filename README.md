@@ -9,10 +9,12 @@ Shared configuration interface for AOP mods on **Minecraft 1.21.1 / NeoForge**.
 [Русский](README.ru.md)
 
 ![Thaumcraft configuration screen](docs/images/thaumcraft.png)
+The mod ID remains **`aop_ui`**. Settings providers can register a separate loader ID and translation namespace with `SettingsRegistry.register(modId, namespace, displayName, theme, specs...)`; existing overloads and the three-argument `Provider` constructor remain available.
+
 
 ## Overview
 
-AOP: UI provides a common settings screen for AOP: Thaumcraft 4, Thaumic Tinkerer and AOP:TC4 Compact. Only registered participants are displayed; the library does not require any consumer mod.
+AOP: UI provides a common settings screen for [AOP: Thaumcraft 4](https://github.com/Salossov/AOP-Thaumcraft-4), [Thaumic Tinkerer](https://github.com/Salossov/AOPTC4-Thaumic-Tinkerer) and [AOP:TC4 Compact](https://github.com/Salossov/AOPTC4-Compact). Only registered participants are displayed; the library does not require any consumer mod.
 
 - Themed navigation with an in-place mod selector and category icons.
 - Search, descriptions, validated controls, lists and default-value restoration.
@@ -27,7 +29,7 @@ AOP: UI provides a common settings screen for AOP: Thaumcraft 4, Thaumic Tinkere
 | Component | Requirement |
 | --- | --- |
 | Minecraft | 1.21.1 |
-| NeoForge | 21.1.252 ≤ version < 21.2 |
+| NeoForge | 21.1.166 ≤ version < 21.2 |
 | Java | 21 |
 
 Install the AOP: UI gameplay JAR on both client and server alongside compatible builds of the consuming mods. Each consumer retains its own dependencies. Compact remains optional on the server.
@@ -58,9 +60,9 @@ With JDK 21 installed, run:
 ./gradlew.ps1 build
 ```
 
-On Linux and macOS, use `sh ./gradlew build`. Artifacts are written to `build/libs/`. The gameplay artifact is `aopui-1.21.1-0.7.0.jar`; the sources JAR is intended for development.
+On Linux and macOS, use `sh ./gradlew build`. Artifacts are written to `build/libs/`. The gameplay artifact is `aopui-1.21.1-0.8.0.jar`; the sources JAR is intended for development.
 
-Build the library before its consumers. Consumer Gradle builds accept `-PaopUiJar=/path/to/aopui-1.21.1-0.7.0.jar`. Library classes must not be bundled into consumer artifacts.
+Build the library before its consumers. Consumer Gradle builds accept `-PaopUiJar=/path/to/aopui-1.21.1-0.8.0.jar`. Library classes must not be bundled into consumer artifacts.
 
 ## Integration API
 
@@ -97,13 +99,13 @@ Configuration discovery and NeoForge synchronization are isolated in `NeoForgeCo
 
 In **Actions → Build and release → Run workflow**, enable **release** to publish an ordinary GitHub release with tag `v<version>`. Leave **version** blank to use `mod_version` from `gradle.properties`, or enter `major.minor.patch` to override it for that run. The selected version is used in the JAR metadata, filenames and tag; the workflow does not modify the source files. Prerelease suffixes are rejected in release mode. Existing release tags are never overwritten. Pushes to `main` and manual runs with **release** disabled update the single `nightly` prerelease. Nightly JAR versions use `<mod_version>-nightly.<source_commit>`. Pull requests build artifacts without publishing. Local `act` runs never publish. Ordinary release notes list every commit since the nearest previous ordinary release on the selected history, with commit links and a comparison link. The first release includes the full history. Nightly notes omit this list.
 
-Individual CI and **Build mod suite** use the same build recipes and `aop-suite-manifest.json` format. An individual workflow builds or reuses only its component and required dependencies, then publishes only its own component. The suite can import its JARs from that repository's Releases when source revision and contents, version, toolchain, recipe and dependency checksums match. Repository caches are independent; published JARs provide reuse across repositories. A nightly run accepts matching release or nightly artifacts; an ordinary release accepts only release artifacts, including dependencies. The `force_rebuild` input bypasses ready JARs and preserves Gradle caching. Keep `.github/scripts/suite.py` and `release.py` identical across the four repositories when updating the shared artifact contract.
+Individual CI and **Build mod suite** use the same build recipes and `aop-suite-manifest.json` format. An individual workflow builds or reuses only its component and required dependencies, then publishes only its own component. The suite can import its JARs from that repository's Releases when source revision and contents, version, toolchain, recipe and dependency checksums match. Repository caches are independent; published JARs provide reuse across repositories. A nightly run accepts matching release or nightly artifacts; an ordinary release accepts only release artifacts, including dependencies. The `force_rebuild` input bypasses ready JARs and preserves Gradle caching. Keep `.github/scripts/suite.py`, `suite_bundle.py` and `release.py` identical across the four repositories when updating the shared artifact contract.
 
 `build` runs configuration rule tests and compiles verification sources. Native client and server scenarios use a separate verification source set excluded from the gameplay artifact.
 
 GitHub Actions builds source and build-system changes. Documentation-only changes do not trigger a build. The workflow can be run locally with `act pull_request`.
 
-Consumer workflows use `Salossov/aop-ui` by default. The optional `AOPUI_REPOSITORY` variable overrides the repository in `owner/repository` format; `AOPUI_REF` defaults to `main`.
+Consumer workflows use `Salossov/AOP-UI` by default. The optional `AOPUI_REPOSITORY` variable overrides the repository in `owner/repository` format; `AOPUI_REF` defaults to `main`.
 
 ## Author and terms
 

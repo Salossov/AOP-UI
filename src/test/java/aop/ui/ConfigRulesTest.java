@@ -104,6 +104,11 @@ public final class ConfigRulesTest {
         rejects(()->aop.ui.api.SettingsRegistry.registerDependency("fixture_dependencies",ds,portal,master));
         rejects(()->aop.ui.api.SettingsRegistry.registerDependency("fixture_dependencies",ds,master,master));
         rejects(()->aop.ui.api.SettingsRegistry.registerDependency("fixture_dependencies",ds,flag,master));
+        aop.ui.api.SettingsRegistry.register("fixture_aop","original_namespace","Renamed fixture",aop.ui.api.UiTheme.UI,spec);
+        var renamed=aop.ui.api.SettingsRegistry.provider("fixture_aop");
+        check(renamed.modId().equals("fixture_aop")&&renamed.namespace().equals("original_namespace"),"Separate loader and resource identities");
+        check(new ConfigOption(flag,ModConfig.Type.SERVER).translationKey("fixture_aop").equals("aopui.option.original_namespace.flag"),"Renaming loader retains existing translations");
+        check(new aop.ui.api.SettingsRegistry.Provider("legacy","Legacy",aop.ui.api.UiTheme.UI).namespace().equals("legacy"),"Existing provider constructor retains namespace");
         System.out.println("AOP_UI_CONFIG_RULES_PASS checks="+checks);
     }
 }

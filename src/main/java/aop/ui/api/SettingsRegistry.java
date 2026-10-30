@@ -6,7 +6,9 @@ import aop.ui.config.NeoForgeConfigs;
 
 /** Opt-in registration. AOP: UI never exposes unregistered mods' configuration. */
 public final class SettingsRegistry {
-    public record Provider(String modId, String name, UiTheme theme) { }
+    public record Provider(String modId, String name, UiTheme theme, String namespace) {
+        public Provider(String modId, String name, UiTheme theme) { this(modId, name, theme, modId); }
+    }
     private static final ConcurrentSkipListMap<String, Provider> PROVIDERS = new ConcurrentSkipListMap<>();
     private static final java.util.Map<String,java.util.Set<net.neoforged.neoforge.common.ModConfigSpec>> SOURCES = new java.util.concurrent.ConcurrentHashMap<>();
     private static final java.util.Map<String,String> CATEGORIES = new java.util.concurrent.ConcurrentHashMap<>();
@@ -15,8 +17,14 @@ public final class SettingsRegistry {
 
     /** Call after registering the mod's configs, before reading startup content switches. */
     public static void register(String modId, String displayName, UiTheme theme) {
+        register(modId, modId, displayName, theme);
+    }
+
+    /** Loader identity and translation namespace may differ without renaming saved content. */
+    public static void register(String modId, String namespace, String displayName, UiTheme theme) {
         if (!modId.matches("[a-z0-9_]+")) throw new IllegalArgumentException("Invalid mod ID");
-        var provider = new Provider(modId, displayName, java.util.Objects.requireNonNull(theme));
+        if (!namespace.matches("[a-z0-9_.-]+")) throw new IllegalArgumentException("Invalid resource namespace");
+        var provider = new Provider(modId, displayName, java.util.Objects.requireNonNull(theme), namespace);
         if (PROVIDERS.putIfAbsent(modId, provider) != null) throw new IllegalStateException("Settings already registered: " + modId);
         NeoForgeConfigs.primeStartup(modId);
     }
@@ -25,9 +33,12 @@ public final class SettingsRegistry {
     public static Provider provider(String modId) { return PROVIDERS.get(modId); }
     /** Explicit source allowlist. Omitting sources retains all of this provider's NeoForge configs. */
     public static void register(String modId,String displayName,UiTheme theme,net.neoforged.neoforge.common.ModConfigSpec... sources) {
-        if(sources.length==0){register(modId,displayName,theme);return;}
+        register(modId,modId,displayName,theme,sources);
+    }
+    public static void register(String modId,String namespace,String displayName,UiTheme theme,net.neoforged.neoforge.common.ModConfigSpec... sources) {
+        if(sources.length==0){register(modId,namespace,displayName,theme);return;}
         if(PROVIDERS.containsKey(modId))throw new IllegalStateException("Settings already registered: "+modId);
-        SOURCES.put(modId,java.util.Set.of(sources));register(modId,displayName,theme);
+        SOURCES.put(modId,java.util.Set.of(sources));register(modId,namespace,displayName,theme);
     }
     public static boolean includesSource(String modId,net.neoforged.neoforge.common.ModConfigSpec source) {
         var sources=SOURCES.get(modId);return sources==null||sources.contains(source);

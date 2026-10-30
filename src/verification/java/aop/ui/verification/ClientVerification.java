@@ -58,7 +58,7 @@ public final class ClientVerification {
                 if(providers.get(index).equals("aop_ui_verification"))testDependencies(mc);
                 var provider=SettingsRegistry.provider(providers.get(index));
                 check(net.neoforged.fml.ModList.get().getModContainerById(provider.modId()).orElseThrow().getCustomExtension(net.neoforged.neoforge.client.gui.IConfigScreenFactory.class).isPresent(),"Mods config factory");
-                if(provider.modId().equals("thaumcraft")||provider.modId().equals("aop_ui_verification"))toggleAndRestore(mc,provider.modId());
+                if(provider.modId().equals("thaumcraft_aop")||provider.modId().equals("aop_ui_verification"))toggleAndRestore(mc,provider.modId());
                 var result=new JsonObject();result.addProperty("provider",provider.modId());result.addProperty("passed",true);results.add(result);
                 index++;
                 if(index<providers.size()){stage=1;at=ticks;return;}

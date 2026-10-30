@@ -11,7 +11,7 @@ description='''Shared themed configuration screens and administrator settings ed
 [[dependencies.aop_ui]]
 modId="neoforge"
 type="required"
-versionRange="[21.1.252,21.2)"
+versionRange="[21.1.166,21.2)"
 ordering="NONE"
 side="BOTH"
 [[dependencies.aop_ui]]

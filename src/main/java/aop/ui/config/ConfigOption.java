@@ -11,7 +11,9 @@ public record ConfigOption(ModConfigSpec.ConfigValue<?> value, ModConfig.Type sc
     public String category() { return value.getPath().size() > 1 ? value.getPath().getFirst() : "general"; }
     public String translationKey(String modId) {
         var key = value.getSpec().getTranslationKey();
-        return key != null ? key : "aopui.option." + modId + "." + path();
+        var provider = aop.ui.api.SettingsRegistry.provider(modId);
+        var namespace = provider == null ? modId : provider.namespace();
+        return key != null ? key : "aopui.option." + namespace + "." + path();
     }
     public String description() { return Objects.toString(value.getSpec().getComment(), ""); }
     public boolean restart() { return scope == ModConfig.Type.STARTUP || value.getSpec().restartType() != ModConfigSpec.RestartType.NONE; }
