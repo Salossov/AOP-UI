@@ -153,7 +153,7 @@ public final class SettingsScreen extends Screen {
         addRows();
     }
     private static String categoryIcon(String category){
-        return switch(category){case "interface","models","effects","research","world","compatibility"->category;case "runicShield"->"shield";default->"general";};
+        return switch(category){case "interface","models","effects","research","world","compatibility"->category;case "runicShield"->"shield";case "client"->"interface";case "crafting"->"infusion";case "focusUpgrades"->"wand";case "powerConverters"->"lightning";case "silly"->"effects";default->"general";};
     }
     private String parentPath(ConfigDocument d,ConfigOption o){
         var parent=SettingsRegistry.dependency(d.modId(),d.spec(),o.path());return parent==null?null:String.join(".",parent.getPath());
@@ -314,6 +314,7 @@ public final class SettingsScreen extends Screen {
         return super.keyPressed(key,scan,modifiers);
     }
     @Override public void render(GuiGraphics g,int mx,int my,float tick) {
+        renderPanorama(g,tick);renderBlurredBackground(tick);
         var t=theme();ThemeRenderer.panel(g,t,"panel",0,0,side,height);ThemeRenderer.panel(g,t,"panel",side+2,0,width-side-2,height);
         if(heroHeight>0)ThemeRenderer.emblem(g,t,8,8,side-16,heroHeight);
         else g.drawCenteredString(font,title,side/2,12,t.accent());

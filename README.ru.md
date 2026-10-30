@@ -1,6 +1,8 @@
 # AOP: UI
 
-<img src="src/main/resources/logo.png" alt="AOP: UI" width="128" height="128">
+<img src="assets/branding/aop-logo.png" alt="AOP: UI" width="256" height="256">
+
+**Проекты AOP:** [Thaumcraft 4](https://github.com/Salossov/AOP-Thaumcraft-4) · [Compact](https://github.com/Salossov/AOPTC4-Compact) · [Thaumic Tinkerer](https://github.com/Salossov/AOPTC4-Thaumic-Tinkerer) · [AOP UI](https://github.com/Salossov/AOP-UI) · [Forbidden Magic](https://github.com/Salossov/AOPTC4-Forbidden-Magic) · [Thaumic Energistics](https://github.com/Salossov/AOPTC4-Thaumic-Energistics)
 
 Общий интерфейс настроек модов AOP для **Minecraft 1.21.1 / NeoForge**.
 

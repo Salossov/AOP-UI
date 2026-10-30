@@ -37,6 +37,7 @@ final class ListEditorScreen extends Screen {
     @Override public boolean mouseScrolled(double x,double y,double h,double v) {offset=Math.clamp(offset-(int)Math.signum(v),0,Math.max(0,entries.size()-Math.max(1,(height-108)/24)));rebuildWidgets();return true;}
     @Override public void renderBackground(GuiGraphics g,int x,int y,float tick) { }
     @Override public void render(GuiGraphics g,int x,int y,float tick) {
+        renderPanorama(g,tick);renderBlurredBackground(tick);
         ThemeRenderer.panel(g,theme,"panel",0,0,width,height);g.drawCenteredString(font,title,width/2,16,theme.text());g.drawCenteredString(font,error,width/2,height-78,0xffff8e8e);super.render(g,x,y,tick);
     }
 }

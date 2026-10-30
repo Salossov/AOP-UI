@@ -27,6 +27,7 @@ final class ChoiceScreen extends Screen {
         offset=Math.clamp(offset-(int)Math.signum(vertical),0,Math.max(0,values.size()-Math.max(1,(height-80)/24)));rebuildWidgets();return true;
     }
     @Override public void render(GuiGraphics g,int x,int y,float tick) {
+        renderPanorama(g,tick);renderBlurredBackground(tick);
         ThemeRenderer.panel(g,theme,"panel",0,0,width,height);g.drawCenteredString(font,title,width/2,16,theme.text());super.render(g,x,y,tick);
     }
     @Override public void onClose() { minecraft.setScreen(parent); }
