@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 final class ThemeButton extends Button {
     private final UiTheme theme;
     private final boolean selected;
+    private final ScrollingText caption = new ScrollingText();
     private String icon;private boolean dropdown,modIcon,navigation,iconOnly;
     ThemeButton(int x,int y,int w,int h,Component text,UiTheme theme,boolean selected,OnPress press) {
         super(x,y,w,h,text,press,DEFAULT_NARRATION);this.theme=theme;this.selected=selected;
@@ -26,8 +27,11 @@ final class ThemeButton extends Button {
         if(leading){int size=modIcon?18:12,ix=getX()+(iconOnly?(width-size)/2:modIcon?4:5),iy=getY()+(height-size)/2;if(modIcon)ThemeRenderer.modIcon(g,theme,ix,iy,size);else ThemeRenderer.icon(g,theme,icon,ix,iy,12,12,color);}
         if(dropdown)ThemeRenderer.icon(g,theme,"chevron",getX()+width-16,getY()+(height-12)/2,12,12,color);
         if(!iconOnly&&!getMessage().getString().isEmpty()) {
-            if(navigation)g.drawString(Minecraft.getInstance().font,Minecraft.getInstance().font.plainSubstrByWidth(getMessage().getString(),width-28),getX()+22,getY()+(height-8)/2,color,false);
-            else renderScrollingString(g,Minecraft.getInstance().font,getMessage(),getX()+(modIcon?27:leading?21:5),getY(),getX()+width-(dropdown?19:5),getY()+height,color);
+            int left=getX()+(navigation?22:modIcon?27:leading?21:5);
+            int right=getX()+width-(dropdown?19:navigation?6:5);
+            caption.draw(g,Minecraft.getInstance().font,getMessage(),left,getY(),right-left,height,color,isHoveredOrFocused(),!navigation,1);
+            if(Minecraft.getInstance().font.width(getMessage())>right-left && getTooltip()==null)
+                setTooltip(net.minecraft.client.gui.components.Tooltip.create(getMessage()));
         }
         if(isFocused())g.fill(getX()+4,getY()+height-3,getX()+width-4,getY()+height-2,theme.accent());
     }

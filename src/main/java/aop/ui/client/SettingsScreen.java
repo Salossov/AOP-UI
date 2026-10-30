@@ -36,6 +36,8 @@ public final class SettingsScreen extends Screen {
     private final Map<String,String> invalidInputs=new HashMap<>();
     private final List<Row> rows=new ArrayList<>();
     private final List<GuiEventListener> rowWidgets=new ArrayList<>();
+    private final Map<String,ScrollingText> captions=new HashMap<>();
+    private ScrollingText caption(String key){return captions.computeIfAbsent(key,k->new ScrollingText());}
     private EditBox search;
     private ThemeButton clearSearch;
 
@@ -324,16 +326,14 @@ public final class SettingsScreen extends Screen {
         int headingWidth=Math.max(12,headingRight-headingX);
         float headingScale=1.25f;
         var headingText=Component.literal(heading).withStyle(net.minecraft.ChatFormatting.BOLD);
-        var fittedHeading=Component.literal(font.substrByWidth(headingText,(int)(headingWidth/headingScale)).getString()).withStyle(net.minecraft.ChatFormatting.BOLD);
-        g.pose().pushPose();g.pose().translate(headingX,headingY-2,0);g.pose().scale(headingScale,headingScale,1);
-        g.drawString(font,fittedHeading,0,0,t.accent(),false);g.pose().popPose();
+        caption("heading").draw(g,font,headingText,headingX,headingY-2,headingWidth,14,t.accent(),mx>=headingX&&mx<headingRight&&my>=headingY-2&&my<headingY+14,false,headingScale);
         ThemeRenderer.panel(g,t,"field",searchX,searchY,searchWidth,22);
         ThemeRenderer.icon(g,t,"search",searchX+6,searchY+5,12,12,search.isFocused()?t.accent():t.muted());
         if(search.isFocused())g.fill(searchX+4,searchY+20,searchX+searchWidth-4,searchY+21,t.accent());
         String section=tabs().stream().filter(tab->tab.key().equals(category)).findFirst().map(tab->categoryLabel(tab).getString()).orElse("");
         ThemeRenderer.divider(g,t,side+14,top-6,contentRight-side-14);
         if(!query.isBlank())section=tr("aopui.search.results").getString();
-        g.drawString(font,section,side+20,top-17,t.muted(),false);
+        caption("section").draw(g,font,Component.literal(section),side+20,top-18,Math.max(1,contentRight-side-20),11,t.muted(),mx>side&&mx<contentRight&&my>=top-18&&my<top-6,false,1);
         boolean focusChanged=getFocused()!=helpFocus;helpFocus=getFocused();Row hovered=null,focused=null;
         for(var row:rows){
             int x=side+12,y=row.y();var o=row.option();var s=row.state();
@@ -342,8 +342,13 @@ public final class SettingsScreen extends Screen {
             ThemeRenderer.panel(g,t,"row",x,y,contentRight-x,ROW_HEIGHT);
             int textWidth=Math.max(20,contentRight-controlWidth()-26-x-14-indent);
             if(indent>0){g.fill(x+8,y+3,x+9,y+ROW_HEIGHT-2,t.edge());g.fill(x+8,y+16,x+14,y+17,t.edge());}
-            var labelLines=font.split(label(row.document(),o),textWidth);
-            for(int line=0;line<Math.min(2,labelLines.size());line++)g.drawString(font,labelLines.get(line),x+8+indent,y+(labelLines.size()>1?4:8)+line*10,enabled?t.text():t.muted(),false);
+            var fullLabel=label(row.document(),o);
+            var labelLines=font.split(fullLabel,textWidth);
+            boolean twoLines=labelLines.size()==2;
+            boolean rowHovered=mx>=x&&mx<contentRight&&my>=y&&my<y+ROW_HEIGHT;
+            String captionKey=row.document().id()+"/"+o.path();
+            if(labelLines.size()>2)caption(captionKey+"/label").draw(g,font,fullLabel,x+8+indent,y+7,textWidth,11,enabled?t.text():t.muted(),rowHovered,false,1);
+            else for(int line=0;line<labelLines.size();line++)g.drawString(font,labelLines.get(line),x+8+indent,y+(twoLines?4:8)+line*10,enabled?t.text():t.muted(),false);
             Component note=s.error.isEmpty()?(s.loading?tr("aopui.loading"):o.restart()?tr("aopui.restart"):Component.empty()):tr(s.error);
             if(!enabled)note=tr("aopui.dependency.disabled");
             if(s.snapshot!=null&&remote&&!s.editable)note=tr("aopui.readonly");
@@ -351,10 +356,9 @@ public final class SettingsScreen extends Screen {
             boolean restartNote=o.restart()&&s.error.isEmpty()&&!s.loading&&enabled&&(!remote||s.editable);
             if(restartNote){
                 float scale=.75f;
-                var smallNote=Component.literal(font.plainSubstrByWidth(note.getString(),(int)(textWidth/scale))).withStyle(net.minecraft.ChatFormatting.UNDERLINE);
-                g.pose().pushPose();g.pose().translate(x+8+indent,y+(labelLines.size()>1?25:22),0);g.pose().scale(scale,scale,1);
-                g.drawString(font,smallNote,0,0,t.muted(),false);g.pose().popPose();
-            }else g.drawString(font,font.plainSubstrByWidth(note.getString(),textWidth),x+8+indent,y+(labelLines.size()>1?25:22),t.muted(),false);
+                var smallNote=note.copy().withStyle(net.minecraft.ChatFormatting.UNDERLINE);
+                caption(captionKey+"/note").draw(g,font,smallNote,x+8+indent,y+(twoLines?24:21),textWidth,9,t.muted(),rowHovered,false,scale);
+            }else caption(captionKey+"/note").draw(g,font,note,x+8+indent,y+(twoLines?24:21),textWidth,11,t.muted(),rowHovered,false,1);
             if(mx>=x&&mx<contentRight&&my>=y&&my<y+ROW_HEIGHT)hovered=row;
             if(getFocused() instanceof AbstractWidget widget&&widget.getX()>side&&widget.getY()>=y&&widget.getY()<y+ROW_HEIGHT)focused=row;
             if(helpWidth==0&&mx>=x&&mx<x+textWidth+indent&&my>=y&&my<y+ROW_HEIGHT){
@@ -370,7 +374,7 @@ public final class SettingsScreen extends Screen {
         if(rows.isEmpty())g.drawCenteredString(font,tr("aopui.empty"),(side+contentRight)/2,top+16,t.muted());
         int count=Math.max(1,(bottom-top)/ROW_HEIGHT);
         if(totalRows>count){int h=Math.max(12,(bottom-top)*count/totalRows),y=top+(bottom-top-h)*offset/Math.max(1,totalRows-count);g.fill(contentRight+3,top,contentRight+5,bottom,0xff101111);g.fill(contentRight+3,y,contentRight+5,y+h,t.edge());}
-        g.drawString(font,font.plainSubstrByWidth(error.getString(),Math.max(10,width-side-28)),side+14,height-43,saving?t.accent():0xffff9292,false);
+        caption("error").draw(g,font,error,side+14,height-44,Math.max(10,width-side-28),11,saving?t.accent():0xffff9292,mx>side&&my>=height-44,false,1);
         super.render(g,mx,my,tick);
         // Short crossfade, no moving targets: controls retain their actual click bounds.
         float progress=Math.clamp((net.minecraft.Util.getMillis()-transitionStarted)/160f,0f,1f);

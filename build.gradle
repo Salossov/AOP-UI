@@ -81,3 +81,11 @@ tasks.register('configRulesTest', JavaExec) {
     mainClass = 'aop.ui.ConfigRulesTest'
 }
 tasks.named('check') { dependsOn 'configRulesTest', 'verificationClasses' }
+
+// Deterministic UI motion checks; no game window or world required.
+tasks.register('textScrollTest', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'aop.ui.client.TextScrollStateTest'
+}
+tasks.named('check') { dependsOn 'textScrollTest' }
